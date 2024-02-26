@@ -30,10 +30,12 @@ def generate_response(uploaded_file, openai_api_key, query_text):
         documents = process_pdf(uploaded_file)
         
         #Split Documents into chunks
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=150)
-        docs = text_splitter.create_documents(documents)
+        text_splitter = RecursiveCharacterTextSplitter(separators=["\n\n", "\n"], chunk_size=1500, chunk_overlap=150)
+        document_content = text_splitter.split_text(documents)
+        docs = text_splitter.create_documents(document_content)
         
         embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+        
         
         persist_directory = 'docs/chroma/'
         
@@ -42,6 +44,7 @@ def generate_response(uploaded_file, openai_api_key, query_text):
             embedding = embeddings,
             persist_directory = persist_directory
         )
+        
         
         retriever = vectordb.as_retriever(search_kwargs={'k': 7})
         
@@ -74,8 +77,8 @@ with st.form('myform', clear_on_submit=True):
     
     if submitted:
         with st.spinner('Getting Answer...'):
-            response = generate_response(uploaded_file, openai.api_key, question)
-            result.append(response)
+            response = generate_response(uploaded_file,openai.api_key,question)
+            result.append(response["result"])
 
 if len(result):
     st.info(result)    
