@@ -2,3 +2,4 @@ streamlit>=1.26.0
 langchain
 openai
 PyPDF2
+streamlit-chat
